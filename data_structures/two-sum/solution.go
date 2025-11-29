@@ -1,0 +1,5 @@
+package twosum
+
+func Solve() {
+}
+
