@@ -1,6 +1,7 @@
 package db
 
 import (
+	"math/rand"
 	"time"
 )
 
@@ -159,4 +160,57 @@ func GetProblemStats(path string) (attempts int, passes int, totalTime int, err 
 	conn.Get(&passes, "SELECT COUNT(*) FROM sessions WHERE problem_path = ? AND passed = 1", path)
 	conn.Get(&totalTime, "SELECT COALESCE(SUM(duration_seconds), 0) FROM sessions WHERE problem_path = ?", path)
 	return
+}
+
+func ClearSessions() error {
+	_, err := conn.Exec("DELETE FROM sessions")
+	if err != nil {
+		return err
+	}
+	_, err = conn.Exec("DELETE FROM review_schedule")
+	return err
+}
+
+func SeedSessions() error {
+	problems := []string{
+		"data_structures/two-sum",
+		"data_structures/valid-parentheses",
+		"data_structures/merge-intervals",
+		"algorithms/binary-search",
+		"algorithms/quick-sort",
+		"algorithms/dijkstra",
+		"patterns/sliding-window",
+		"patterns/two-pointers",
+	}
+
+	start := time.Date(2025, 5, 1, 0, 0, 0, 0, time.Local)
+	now := time.Now()
+
+	for d := start; !d.After(now); d = d.AddDate(0, 0, 1) {
+		if rand.Float32() > 0.4 {
+			continue
+		}
+
+		count := rand.Intn(3) + 1
+		for range count {
+			problem := problems[rand.Intn(len(problems))]
+			duration := rand.Intn(1800) + 300
+			passed := rand.Float32() > 0.15
+
+			hour := rand.Intn(12) + 8
+			minute := rand.Intn(60)
+			sessionTime := time.Date(d.Year(), d.Month(), d.Day(), hour, minute, 0, 0, time.Local)
+			endTime := sessionTime.Add(time.Duration(duration) * time.Second)
+
+			_, err := conn.Exec(`
+				INSERT INTO sessions (problem_path, date, passed, duration_seconds, started_at, finished_at)
+				VALUES (?, ?, ?, ?, ?, ?)
+			`, problem, d.Format("2006-01-02"), passed, duration, sessionTime.Format(time.RFC3339), endTime.Format(time.RFC3339))
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }

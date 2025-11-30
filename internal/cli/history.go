@@ -2,23 +2,38 @@ package cli
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
 	"time"
 
 	"cogikyo/kaizen/internal/ui"
 )
 
 type HistoryCmd struct {
-	Year int `arg:"" optional:"" help:"Year to show (defaults to current)"`
+	Start string `arg:"" optional:"" help:"Start month (yy-mm format)"`
 }
 
 func (c *HistoryCmd) Run() error {
-	year := c.Year
-	if year == 0 {
-		year = time.Now().Year()
+	startMonth := ui.DefaultStartMonth()
+
+	if c.Start != "" {
+		parts := strings.Split(c.Start, "-")
+		if len(parts) != 2 {
+			ui.Error("invalid format, use yy-mm (e.g., 24-06)")
+			return nil
+		}
+		year, err1 := strconv.Atoi(parts[0])
+		month, err2 := strconv.Atoi(parts[1])
+		if err1 != nil || err2 != nil || month < 1 || month > 12 {
+			ui.Error("invalid format, use yy-mm (e.g., 24-06)")
+			return nil
+		}
+		year += 2000
+		startMonth = time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.Local)
 	}
 
-	fmt.Printf("\n%s%d%s\n\n", ui.Bold, year, ui.Reset)
-	ui.RenderHistoryYear(year)
+	fmt.Println()
+	ui.RenderStatus(startMonth)
 	fmt.Println()
 	return nil
 }

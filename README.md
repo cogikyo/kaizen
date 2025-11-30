@@ -20,7 +20,9 @@ kz new two-sum                # create problem (interactive)
 kz solve two-sum              # open in $EDITOR
 kz done two-sum               # run tests, record result
 
-kz                            # show history + suggest next
+kz                            # show status + suggest next (history for last 6 months)
+kz history                    # practice history (6 months)
+kz history 06-01              # history starting from yy-mm
 kz random                     # pick random (prioritizes due)
 kz review                     # problems due for review
 
@@ -51,12 +53,3 @@ algorithms/
 | 4     | medium    |
 | 5     | normal    |
 | 6     | easy      |
-
-## Spaced Repetition
-
-After `kz done`:
-
-- **Pass**: interval increases (1 → 2 → 4 → 8 → 16 → 32 days)
-- **Fail**: reset to 1 day
-
-`kz review` shows what's due. `kz random` prioritizes due problems.

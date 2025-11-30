@@ -11,27 +11,33 @@ import (
 var reader = bufio.NewReader(os.Stdin)
 
 func Prompt(label string) string {
-	fmt.Printf("%s%s:%s ", Dim, label, Reset)
+	fmt.Printf("%s%s %s%s:%s ", BrightCyan, Reset, Cyan, label, Reset)
+	line, _ := reader.ReadString('\n')
+	return strings.TrimSpace(line)
+}
+
+func PromptInline(label string) string {
+	fmt.Printf("  %s%s:%s ", Dim, label, Reset)
 	line, _ := reader.ReadString('\n')
 	return strings.TrimSpace(line)
 }
 
 func PromptConfirm(label string) bool {
-	fmt.Printf("%s%s [y/N]:%s ", Dim, label, Reset)
+	fmt.Printf("%s%s %s%s%s %s[y/N]:%s ", BrightCyan, Reset, Cyan, label, Reset, Dim, Reset)
 	line, _ := reader.ReadString('\n')
 	return strings.ToLower(strings.TrimSpace(line)) == "y"
 }
 
 func PromptSelect(label string, options []string, allowNew bool) (int, string) {
-	fmt.Printf("\n%s%s%s\n", Dim, label, Reset)
+	fmt.Printf("\n%s%s %s%s%s\n", BrightCyan, Reset, Cyan, label, Reset)
 	for i, opt := range options {
-		fmt.Printf("  %s%d%s %s\n", Cyan, i+1, Reset, opt)
+		fmt.Printf("  %s%d%s %s\n", Dim, i+1, Reset, opt)
 	}
 	if allowNew {
 		fmt.Printf("  %s+%s new\n", Green, Reset)
 	}
 
-	input := Prompt("select")
+	input := PromptInline("select")
 	if input == "" {
 		return -1, ""
 	}
@@ -44,15 +50,15 @@ func PromptSelect(label string, options []string, allowNew bool) (int, string) {
 }
 
 func PromptMultiSelect(label string, options []string, hint string) []string {
-	fmt.Printf("\n%s%s%s %s(%s)%s\n", Dim, label, Reset, Dim, hint, Reset)
+	fmt.Printf("\n%s%s %s%s%s %s(%s)%s\n", BrightCyan, Reset, Cyan, label, Reset, Dim, hint, Reset)
 	for i, opt := range options {
-		fmt.Printf("  %s%d%s %s\n", Cyan, i+1, Reset, opt)
+		fmt.Printf("  %s%d%s %s\n", Dim, i+1, Reset, opt)
 	}
 	if len(options) > 0 {
 		fmt.Printf("  %s+%s add new\n", Green, Reset)
 	}
 
-	input := Prompt("select")
+	input := PromptInline("select")
 	if input == "" {
 		return nil
 	}
@@ -86,16 +92,4 @@ func PromptMultiSelect(label string, options []string, hint string) []string {
 	}
 
 	return result
-}
-
-func Success(msg string) {
-	fmt.Printf("%s✓%s %s\n", Green, Reset, msg)
-}
-
-func Error(msg string) {
-	fmt.Printf("\n%s ✗ error:%s %s%s%s\n", Bold+Red, Reset, Red+Dim, msg, Reset)
-}
-
-func Info(msg string) {
-	fmt.Printf("%s%s%s\n", Dim, msg, Reset)
 }
