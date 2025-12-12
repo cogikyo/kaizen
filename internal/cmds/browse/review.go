@@ -1,4 +1,4 @@
-package cli
+package browse
 
 import (
 	"fmt"
@@ -21,13 +21,13 @@ func (c *ReviewCmd) Run() error {
 	}
 
 	fmt.Println()
-	ui.Println(ui.Bold, fmt.Sprintf("%d problems due for review", len(due)))
+	ui.Header(fmt.Sprintf("%d problems due for review", len(due)))
 	fmt.Println()
 
 	for _, p := range due {
 		kyuStr := ""
 		if p.Kyu != nil {
-			kyuStr = fmt.Sprintf(" %s[%d-%s]%s", ui.Dim, *p.Kyu, kyuNames[*p.Kyu-1], ui.Reset)
+			kyuStr = " " + ui.Muted(fmt.Sprintf("[%d-%s]", *p.Kyu, db.KyuNames[*p.Kyu-1]))
 		}
 		fmt.Printf("  %s%s\n", p.Path, kyuStr)
 	}
@@ -38,3 +38,4 @@ func (c *ReviewCmd) Run() error {
 
 	return nil
 }
+

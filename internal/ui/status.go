@@ -12,6 +12,7 @@ const cellWidth = 4
 
 type StatusData struct {
 	StartDate  time.Time
+	EndDate    time.Time
 	Weeks      int
 	TableWidth int
 	Days       []int
@@ -19,9 +20,30 @@ type StatusData struct {
 	Months     []string
 }
 
-func BuildStatus(startMonth time.Time) *StatusData {
-	counts, _ := db.GetSessionCounts(400)
+func BuildStatus() *StatusData {
+	termWidth := TermWidth()
+	availableWidth := termWidth - 4 - 1
+	weeks := availableWidth / (cellWidth + 1)
+	if weeks > 52 {
+		weeks = 52
+	}
+	if weeks < 4 {
+		weeks = 4
+	}
 
+	now := time.Now()
+	endOfMonth := time.Date(now.Year(), now.Month()+1, 0, 0, 0, 0, 0, time.Local)
+	endDate := endOfMonth
+	for endDate.Weekday() != time.Saturday {
+		endDate = endDate.AddDate(0, 0, 1)
+	}
+
+	startDate := endDate.AddDate(0, 0, -(weeks*7 - 1))
+	for startDate.Weekday() != time.Sunday {
+		startDate = startDate.AddDate(0, 0, -1)
+	}
+
+	counts, _ := db.GetSessionCounts(weeks * 7)
 	countMap := make(map[string]int)
 	maxCount := 0
 	for _, c := range counts {
@@ -31,19 +53,8 @@ func BuildStatus(startMonth time.Time) *StatusData {
 		}
 	}
 
-	now := time.Now()
-	logicalStart := time.Date(startMonth.Year(), startMonth.Month(), 1, 0, 0, 0, 0, time.Local)
-
-	startDate := logicalStart
-	for startDate.Weekday() != time.Sunday {
-		startDate = startDate.AddDate(0, 0, -1)
-	}
-
-	const weeks = 29
-	totalDays := weeks * 7
-
-	days := make([]int, totalDays)
-	for i := range totalDays {
+	days := make([]int, weeks*7)
+	for i := range weeks * 7 {
 		d := startDate.AddDate(0, 0, i)
 		if d.After(now) {
 			days[i] = -2
@@ -58,13 +69,13 @@ func BuildStatus(startMonth time.Time) *StatusData {
 		weekSaturday := weekSunday.AddDate(0, 0, 6)
 
 		firstOfMonth := time.Date(weekSunday.Year(), weekSunday.Month(), 1, 0, 0, 0, 0, time.Local)
-		if !firstOfMonth.Before(logicalStart) && !firstOfMonth.Before(weekSunday) && !firstOfMonth.After(weekSaturday) {
+		if !firstOfMonth.Before(startDate) && !firstOfMonth.Before(weekSunday) && !firstOfMonth.After(weekSaturday) {
 			months[w] = firstOfMonth.Format("Jan")
 			continue
 		}
 
 		firstOfNext := firstOfMonth.AddDate(0, 1, 0)
-		if !firstOfNext.Before(logicalStart) && !firstOfNext.Before(weekSunday) && !firstOfNext.After(weekSaturday) {
+		if !firstOfNext.Before(startDate) && !firstOfNext.Before(weekSunday) && !firstOfNext.After(weekSaturday) {
 			months[w] = firstOfNext.Format("Jan")
 		}
 	}
@@ -73,6 +84,7 @@ func BuildStatus(startMonth time.Time) *StatusData {
 
 	return &StatusData{
 		StartDate:  startDate,
+		EndDate:    endDate,
 		Weeks:      weeks,
 		TableWidth: tableWidth,
 		Days:       days,
@@ -83,57 +95,61 @@ func BuildStatus(startMonth time.Time) *StatusData {
 
 func RenderTable(s *StatusData) {
 	weeks := s.Weeks
+	now := time.Now()
+	currentMonth := now.Format("Jan")
+	currentWeekday := int(now.Weekday())
 
-	fmt.Printf("    %s┌", BrightBlack)
-	fmt.Print(strings.Repeat(strings.Repeat("─", cellWidth)+"┬", weeks-1))
-	fmt.Println(strings.Repeat("─", cellWidth) + "┐" + BrightBlack)
-
-	monthLine := "    " + BrightBlack + "│" + Reset
+	monthLine := "    "
 	for w := range weeks {
 		if s.Months[w] != "" {
-			pad := cellWidth - len(s.Months[w])
+			pad := cellWidth + 1 - len(s.Months[w])
 			left := pad / 2
 			right := pad - left
-			monthLine += fmt.Sprintf("%s%s%s%s%s", strings.Repeat(" ", left), Dim, s.Months[w], Reset, strings.Repeat(" ", right))
+			monthStr := s.Months[w]
+			if monthStr == currentMonth {
+				monthStr = Accent(monthStr)
+			} else {
+				monthStr = Muted(monthStr)
+			}
+			monthLine += strings.Repeat(" ", left) + monthStr + strings.Repeat(" ", right)
 		} else {
-			monthLine += strings.Repeat(" ", cellWidth)
+			monthLine += strings.Repeat(" ", cellWidth+1)
 		}
-		monthLine += BrightBlack + "│" + Reset
 	}
 	fmt.Println(monthLine)
 
-	fmt.Printf("    %s├", BrightBlack)
-	fmt.Print(strings.Repeat(strings.Repeat("─", cellWidth)+"┼", weeks-1))
-	fmt.Println(strings.Repeat("─", cellWidth) + "┤" + Reset)
+	fmt.Printf("    %s┌", brightBlack)
+	fmt.Print(strings.Repeat(strings.Repeat("─", cellWidth)+"┬", weeks-1))
+	fmt.Println(strings.Repeat("─", cellWidth) + "┐" + reset)
 
 	dayLabels := []string{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}
 	for row := range 7 {
-		fmt.Printf("%s%s%s %s│%s", Dim, dayLabels[row], Reset, BrightBlack, Reset)
+		label := dayLabels[row]
+		if row == currentWeekday {
+			label = Primary(label)
+		} else {
+			label = Muted(label)
+		}
+		fmt.Printf("%s %s│%s", label, brightBlack, reset)
 		for w := range weeks {
 			idx := w*7 + row
 			if idx >= len(s.Days) {
-				fmt.Printf("%s%s│%s", strings.Repeat(" ", cellWidth), BrightBlack, Reset)
+				fmt.Printf("%s%s│%s", strings.Repeat(" ", cellWidth), brightBlack, reset)
 				continue
 			}
-			fmt.Printf("%s%s│%s", cellBlock(s.Days[idx], s.MaxCount), BrightBlack, Reset)
+			fmt.Printf("%s%s│%s", cellBlock(s.Days[idx], s.MaxCount), brightBlack, reset)
 		}
 		fmt.Println()
 	}
 
-	fmt.Printf("    %s└", BrightBlack)
+	fmt.Printf("    %s└", brightBlack)
 	fmt.Print(strings.Repeat(strings.Repeat("─", cellWidth)+"┴", weeks-1))
-	fmt.Println(strings.Repeat("─", cellWidth) + "┘" + Reset)
+	fmt.Println(strings.Repeat("─", cellWidth) + "┘" + reset)
 }
 
-func RenderStatus(startMonth time.Time) {
-	s := BuildStatus(startMonth)
+func RenderStatus() {
+	s := BuildStatus()
 	RenderTable(s)
-}
-
-func DefaultStartMonth() time.Time {
-	now := time.Now()
-	start := now.AddDate(0, 0, -200)
-	return time.Date(start.Year(), start.Month(), 1, 0, 0, 0, 0, time.Local)
 }
 
 func cellBlock(count, maxCount int) string {
@@ -141,10 +157,10 @@ func cellBlock(count, maxCount int) string {
 		return strings.Repeat(" ", cellWidth)
 	}
 	if count == -2 {
-		return BrightBlack + " ·· " + Reset
+		return brightBlack + " ·· " + reset
 	}
 	if count == 0 {
-		return Black + " ░░ " + Reset
+		return black + " ░░ " + reset
 	}
 	if maxCount == 0 {
 		maxCount = 1
@@ -154,15 +170,15 @@ func cellBlock(count, maxCount int) string {
 	var color string
 	switch {
 	case ratio >= 1.0:
-		color = Yellow
+		color = yellow
 	case ratio >= 0.66:
-		color = Cyan
+		color = cyan
 	case ratio >= 0.33:
-		color = Blue
+		color = blue
 	case ratio >= 0.20:
-		color = Blue + Dim
+		color = blue + dim
 	default:
-		color = Dim
+		color = dim
 	}
-	return color + " ██ " + Reset
+	return color + " ██ " + reset
 }

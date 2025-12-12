@@ -1,6 +1,7 @@
-package cli
+package setup
 
 import (
+	"embed"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -9,9 +10,11 @@ import (
 	"time"
 
 	"cogikyo/kaizen/internal/db"
-	"cogikyo/kaizen/internal/templates"
 	"cogikyo/kaizen/internal/ui"
 )
+
+//go:embed *.tmpl
+var templates embed.FS
 
 type NewCmd struct {
 	Name string `arg:"" optional:"" help:"Problem name"`
@@ -140,12 +143,10 @@ func promptSection() string {
 	return val
 }
 
-var kyuNames = []string{"elite", "difficult", "hard", "medium", "normal", "easy"}
-
 func promptKyu() int {
 	options := make([]string, 6)
 	for i := range 6 {
-		options[i] = fmt.Sprintf("%d %s", i+1, kyuNames[i])
+		options[i] = fmt.Sprintf("%d %s", i+1, db.KyuNames[i])
 	}
 
 	ui.Heading("kyu")
@@ -159,7 +160,7 @@ func promptKyu() int {
 		return 0
 	}
 
-	for i, name := range kyuNames {
+	for i, name := range db.KyuNames {
 		if input == fmt.Sprintf("%d", i+1) || strings.EqualFold(input, name) {
 			return i + 1
 		}
@@ -195,7 +196,7 @@ func promptSource() (string, string) {
 }
 
 func renderTemplate(name, dest string, data map[string]any) error {
-	content, err := templates.FS.ReadFile(name)
+	content, err := templates.ReadFile(name)
 	if err != nil {
 		return err
 	}
@@ -213,3 +214,4 @@ func renderTemplate(name, dest string, data map[string]any) error {
 
 	return tmpl.Execute(f, data)
 }
+

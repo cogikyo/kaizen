@@ -1,4 +1,4 @@
-package cli
+package browse
 
 import (
 	"fmt"
@@ -31,10 +31,10 @@ func (c *RandomCmd) Run() error {
 	}
 
 	fmt.Println()
-	ui.Println(ui.Bold, p.Path)
+	ui.Header(p.Path)
 
 	if p.Kyu != nil {
-		ui.Field("kyu", fmt.Sprintf("%d-%s", *p.Kyu, kyuNames[*p.Kyu-1]))
+		ui.Field("kyu", fmt.Sprintf("%d-%s", *p.Kyu, db.KyuNames[*p.Kyu-1]))
 	}
 	if p.Tags != nil {
 		ui.Field("tags", *p.Tags)
@@ -48,7 +48,7 @@ func (c *RandomCmd) Run() error {
 
 	attempts, passes, totalTime, _ := db.GetProblemStats(p.Path)
 	if attempts > 0 {
-		ui.Field("practiced", fmt.Sprintf("%d attempts, %d passed, %s total", attempts, passes, formatDuration(totalTime)))
+		ui.Field("practiced", fmt.Sprintf("%d attempts, %d passed, %s total", attempts, passes, ui.FormatDuration(totalTime)))
 	}
 
 	ui.Hint("kz solve " + p.Name)
@@ -56,3 +56,4 @@ func (c *RandomCmd) Run() error {
 
 	return nil
 }
+

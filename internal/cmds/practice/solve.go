@@ -1,4 +1,4 @@
-package cli
+package practice
 
 import (
 	"fmt"
@@ -11,6 +11,7 @@ import (
 
 type SolveCmd struct {
 	Problem string `arg:"" optional:"" help:"Problem name"`
+	NoDone  bool   `short:"n" help:"Skip running tests on exit"`
 }
 
 func (c *SolveCmd) Run() error {
@@ -34,7 +35,6 @@ func (c *SolveCmd) Run() error {
 	}
 
 	ui.Hint(fmt.Sprintf("opening %s in %s", p.Path, editor))
-	ui.Hint(fmt.Sprintf("run 'kz done %s' when finished", p.Name))
 	fmt.Println()
 
 	cmd := exec.Command(editor, p.Path)
@@ -42,6 +42,11 @@ func (c *SolveCmd) Run() error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Run()
+
+	if !c.NoDone {
+		fmt.Println()
+		return runDone(p)
+	}
 
 	return nil
 }

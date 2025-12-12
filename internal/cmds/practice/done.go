@@ -1,4 +1,4 @@
-package cli
+package practice
 
 import (
 	"fmt"
@@ -28,7 +28,11 @@ func (c *DoneCmd) Run() error {
 		return nil
 	}
 
-	ui.Println(ui.Dim, "running tests...")
+	return runDone(p)
+}
+
+func runDone(p *db.Problem) error {
+	ui.Hint("running tests...")
 
 	start := time.Now()
 	cmd := exec.Command("go", "test", "-v", "./"+p.Path)
@@ -48,9 +52,9 @@ func (c *DoneCmd) Run() error {
 	}
 
 	if passed {
-		ui.Success(fmt.Sprintf("%s completed (passed) %s", p.Path, formatDuration(duration)))
+		ui.Success(fmt.Sprintf("%s completed (passed) %s", p.Path, ui.FormatDuration(duration)))
 	} else {
-		ui.Warn(fmt.Sprintf("%s completed (failed) %s", p.Path, formatDuration(duration)))
+		ui.Warn(fmt.Sprintf("%s completed (failed) %s", p.Path, ui.FormatDuration(duration)))
 	}
 
 	return nil

@@ -1,4 +1,4 @@
-package cli
+package info
 
 import (
 	"fmt"
@@ -16,25 +16,25 @@ func (c *StatsCmd) Run() error {
 	stats, _ := db.GetStats()
 
 	ui.Section("activity")
-	fmt.Printf("  %s sessions  %s attempts  %s problems practiced\n",
-		ui.Colorize(fmt.Sprintf("%d", stats.TotalSessions), ui.Blue),
-		ui.Colorize(fmt.Sprintf("%d", stats.TotalAttempts), ui.Cyan),
-		ui.Colorize(fmt.Sprintf("%d", stats.UniqueProblems), ui.Green))
-	fmt.Printf("  %s passed  %s failed  %s pass rate\n",
-		ui.Colorize(fmt.Sprintf("%d", stats.TotalPassed), ui.Green),
-		ui.Colorize(fmt.Sprintf("%d", stats.TotalFailed), ui.Red),
-		ui.Colorize(fmt.Sprintf("%.0f%%", stats.PassRate), ui.Dim))
+	fmt.Printf("  %s  %s  %s\n",
+		ui.Primary("sessions", stats.TotalSessions),
+		ui.Count("attempts", stats.TotalAttempts),
+		ui.Positive("problems practiced", stats.UniqueProblems))
+	fmt.Printf("  %s  %s  %s\n",
+		ui.Positive("passed", stats.TotalPassed),
+		ui.Negative("failed", stats.TotalFailed),
+		ui.Muted(fmt.Sprintf("%.0f%% pass rate", stats.PassRate)))
 	if stats.TotalTime > 0 {
 		fmt.Printf("  %s total time  %s avg/session\n",
-			formatDuration(stats.TotalTime),
-			formatDuration(stats.AvgSessionTime))
+			ui.FormatDuration(stats.TotalTime),
+			ui.FormatDuration(stats.AvgSessionTime))
 	}
 
 	fmt.Println()
 	ui.Section("streak")
-	fmt.Printf("  %s current  %s longest\n",
-		ui.Colorize(fmt.Sprintf("%d", stats.CurrentStreak), ui.Green),
-		ui.Colorize(fmt.Sprintf("%d", stats.LongestStreak), ui.Yellow))
+	fmt.Printf("  %s  %s\n",
+		ui.Positive("current", stats.CurrentStreak),
+		ui.Accent("longest", stats.LongestStreak))
 
 	problems, _ := db.GetProblems("", nil, "")
 
@@ -61,11 +61,11 @@ func (c *StatsCmd) Run() error {
 		if cnt > 0 && barLen < 1 {
 			barLen = 1
 		}
-		fmt.Printf("  %s %s%-8s%s %s %s\n",
-			ui.Colorize(fmt.Sprintf("%d", k), ui.Yellow),
-			ui.Dim, kyuNames[k-1], ui.Reset,
-			ui.Bar(barLen, ui.Cyan),
-			ui.Colorize(fmt.Sprintf("(%d)", cnt), ui.Dim))
+		fmt.Printf("  %s %s %s %s\n",
+			ui.Accent(k),
+			ui.Muted(fmt.Sprintf("%-8s", db.KyuNames[k-1])),
+			ui.BarCount(barLen),
+			ui.Muted(fmt.Sprintf("(%d)", cnt)))
 	}
 
 	fmt.Println()
@@ -86,7 +86,7 @@ func (c *StatsCmd) Run() error {
 		if cnt > 0 && barLen < 1 {
 			barLen = 1
 		}
-		fmt.Printf("  %-12s %s %s\n", s, ui.Bar(barLen, ui.Blue), ui.Colorize(fmt.Sprintf("(%d)", cnt), ui.Dim))
+		fmt.Printf("  %-12s %s %s\n", s, ui.BarPrimary(barLen), ui.Muted(fmt.Sprintf("(%d)", cnt)))
 	}
 
 	tags, _ := db.GetTags()
@@ -116,10 +116,11 @@ func (c *StatsCmd) Run() error {
 			if tc.count > 0 && barLen < 1 {
 				barLen = 1
 			}
-			fmt.Printf("  %-12s %s %s\n", tc.tag, ui.Bar(barLen, ui.Green), ui.Colorize(fmt.Sprintf("(%d)", tc.count), ui.Dim))
+			fmt.Printf("  %-12s %s %s\n", tc.tag, ui.BarPositive(barLen), ui.Muted(fmt.Sprintf("(%d)", tc.count)))
 		}
 	}
 
 	fmt.Println()
 	return nil
 }
+

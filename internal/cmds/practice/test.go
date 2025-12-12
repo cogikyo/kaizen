@@ -1,4 +1,4 @@
-package cli
+package practice
 
 import (
 	"fmt"
@@ -29,7 +29,7 @@ func (c *TestCmd) Run() error {
 		}
 	}
 
-	ui.Println(ui.Dim, "running "+path)
+	ui.Hint("running " + path)
 	fmt.Println()
 
 	cmd := exec.Command("go", "test", "-v", path)
@@ -37,3 +37,4 @@ func (c *TestCmd) Run() error {
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
 }
+

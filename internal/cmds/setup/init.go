@@ -1,4 +1,4 @@
-package cli
+package setup
 
 import (
 	"fmt"
@@ -61,3 +61,4 @@ func initSection(name string) error {
 	ui.Success(slug + "/")
 	return nil
 }
+

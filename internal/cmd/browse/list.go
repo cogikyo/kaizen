@@ -1,4 +1,4 @@
-package cli
+package browse
 
 import (
 	"fmt"
@@ -36,18 +36,18 @@ func (c *ListCmd) Run() error {
 			if currentSection != "" {
 				fmt.Println()
 			}
-			ui.Println(ui.Bold, p.Section+"/")
+			ui.Header(p.Section + "/")
 			currentSection = p.Section
 		}
 
 		kyuStr := ""
 		if p.Kyu != nil {
-			kyuStr = " " + ui.Colorize(fmt.Sprintf("[%d-%s]", *p.Kyu, kyuNames[*p.Kyu-1]), ui.Dim)
+			kyuStr = " " + ui.Muted(fmt.Sprintf("[%d-%s]", *p.Kyu, db.KyuNames[*p.Kyu-1]))
 		}
 
 		tagStr := ""
 		if tags := p.TagList(); len(tags) > 0 {
-			tagStr = " " + ui.Colorize(strings.Join(tags, ", "), ui.Cyan)
+			tagStr = " " + ui.Count(strings.Join(tags, ", "))
 		}
 
 		fmt.Printf("  %s%s%s\n", p.Name, kyuStr, tagStr)
@@ -57,40 +57,3 @@ func (c *ListCmd) Run() error {
 	return nil
 }
 
-type SectionsCmd struct{}
-
-func (c *SectionsCmd) Run() error {
-	sections, err := db.GetSections()
-	if err != nil {
-		return err
-	}
-
-	if len(sections) == 0 {
-		ui.Info("no sections yet")
-		return nil
-	}
-
-	for _, s := range sections {
-		ui.ListItem(0, s)
-	}
-	return nil
-}
-
-type TagsCmd struct{}
-
-func (c *TagsCmd) Run() error {
-	tags, err := db.GetTags()
-	if err != nil {
-		return err
-	}
-
-	if len(tags) == 0 {
-		ui.Info("no tags yet")
-		return nil
-	}
-
-	for t, count := range tags {
-		fmt.Printf("  %s %s\n", t, ui.Colorize(fmt.Sprintf("(%d)", count), ui.Dim))
-	}
-	return nil
-}

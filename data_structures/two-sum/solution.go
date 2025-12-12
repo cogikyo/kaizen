@@ -1,5 +1,7 @@
 package twosum
 
-func Solve() {
-}
+import "fmt"
 
+func Solve() {
+	fmt.Printf("hello world")
+}

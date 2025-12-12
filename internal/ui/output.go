@@ -34,13 +34,38 @@ func VisibleLen(s string) int {
 	return length
 }
 
-func Stat(value any, label string, color string) string {
-	return fmt.Sprintf("%s%s%v%s%s%s", Bold+color, "", value, Reset+color, " "+label, Reset)
-}
+func Justified(width int, groups ...string) {
+	if len(groups) == 0 {
+		fmt.Println()
+		return
+	}
+	if len(groups) == 1 {
+		fmt.Println(groups[0])
+		return
+	}
 
-func Justified(left, right string, width int) {
-	leftLen := VisibleLen(left)
-	rightLen := VisibleLen(right)
-	padding := max(width-leftLen-rightLen, 1)
-	fmt.Printf("%s%*s%s\n", left, padding, "", right)
+	totalLen := 0
+	for _, g := range groups {
+		totalLen += VisibleLen(g)
+	}
+
+	gaps := len(groups) - 1
+	totalPadding := max(width-totalLen, gaps)
+	perGap := totalPadding / gaps
+	extra := totalPadding % gaps
+
+	var out string
+	for i, g := range groups {
+		out += g
+		if i < gaps {
+			pad := perGap
+			if i < extra {
+				pad++
+			}
+			for range pad {
+				out += " "
+			}
+		}
+	}
+	fmt.Println(out)
 }
