@@ -19,13 +19,13 @@ func (c *HistoryCmd) Run() error {
 	if c.Start != "" {
 		parts := strings.Split(c.Start, "-")
 		if len(parts) != 2 {
-			ui.Error("invalid format, use yy-mm (e.g., 24-06)")
+			ui.Error("invalid format, use yy-mm")
 			return nil
 		}
 		year, err1 := strconv.Atoi(parts[0])
 		month, err2 := strconv.Atoi(parts[1])
 		if err1 != nil || err2 != nil || month < 1 || month > 12 {
-			ui.Error("invalid format, use yy-mm (e.g., 24-06)")
+			ui.Error("invalid format, use yy-mm")
 			return nil
 		}
 		year += 2000

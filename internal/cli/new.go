@@ -148,13 +148,13 @@ func promptKyu() int {
 		options[i] = fmt.Sprintf("%d %s", i+1, kyuNames[i])
 	}
 
-	fmt.Printf("\n%skyu%s\n", ui.Dim, ui.Reset)
+	ui.Heading("kyu")
 	for i, opt := range options {
-		fmt.Printf("  %s%d%s %s\n", ui.Cyan, i+1, ui.Reset, opt)
+		ui.ListItem(i+1, opt)
 	}
-	fmt.Printf("  %s-%s skip\n", ui.Dim, ui.Reset)
+	ui.ActionItem("-", "skip")
 
-	input := ui.Prompt("select")
+	input := ui.PromptInline("select")
 	if input == "" || input == "-" {
 		return 0
 	}

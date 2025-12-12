@@ -20,17 +20,21 @@ func (c *ReviewCmd) Run() error {
 		return nil
 	}
 
-	fmt.Printf("\n%s%d problems due for review%s\n\n", ui.Bold, len(due), ui.Reset)
+	fmt.Println()
+	ui.Println(ui.Bold, fmt.Sprintf("%d problems due for review", len(due)))
+	fmt.Println()
 
 	for _, p := range due {
 		kyuStr := ""
 		if p.Kyu != nil {
 			kyuStr = fmt.Sprintf(" %s[%d-%s]%s", ui.Dim, *p.Kyu, kyuNames[*p.Kyu-1], ui.Reset)
 		}
-		fmt.Printf("  %s%s%s\n", p.Path, kyuStr, ui.Reset)
+		fmt.Printf("  %s%s\n", p.Path, kyuStr)
 	}
 
-	fmt.Printf("\n%skaizen solve <problem>%s\n\n", ui.Dim, ui.Reset)
+	fmt.Println()
+	ui.Hint("kz solve <problem>")
+	fmt.Println()
 
 	return nil
 }

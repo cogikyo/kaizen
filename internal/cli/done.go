@@ -28,7 +28,7 @@ func (c *DoneCmd) Run() error {
 		return nil
 	}
 
-	fmt.Printf("%srunning tests...%s\n", ui.Dim, ui.Reset)
+	ui.Println(ui.Dim, "running tests...")
 
 	start := time.Now()
 	cmd := exec.Command("go", "test", "-v", "./"+p.Path)
@@ -50,7 +50,7 @@ func (c *DoneCmd) Run() error {
 	if passed {
 		ui.Success(fmt.Sprintf("%s completed (passed) %s", p.Path, formatDuration(duration)))
 	} else {
-		fmt.Printf("%s✗%s %s completed (failed) %s\n", ui.Red, ui.Reset, p.Path, formatDuration(duration))
+		ui.Warn(fmt.Sprintf("%s completed (failed) %s", p.Path, formatDuration(duration)))
 	}
 
 	return nil

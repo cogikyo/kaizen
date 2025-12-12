@@ -31,29 +31,19 @@ func (c *ProfileCmd) Run() error {
 func printHeader(stats *db.Stats, status *ui.StatusData) {
 	w := status.TableWidth
 
-	left := fmt.Sprintf("%s改%s %s%s%s",
-		ui.Yellow+ui.Bold, ui.Reset,
-		ui.Dim, status.StartDate.Format("06-01-02"), ui.Reset)
+	left := ui.Colorize("改", ui.Yellow+ui.Bold) + " " + ui.Colorize(status.StartDate.Format("06-01-02"), ui.Dim)
 
-	right := fmt.Sprintf("%s%d%s %sday streak%s  %s%d%s %slongest%s",
-		ui.Bold+ui.Green, stats.CurrentStreak, ui.Reset,
-		ui.Green, ui.Reset,
-		ui.Bold+ui.Yellow, stats.LongestStreak, ui.Reset,
-		ui.Yellow, ui.Reset)
+	right := ui.Colorize(fmt.Sprintf("%d", stats.CurrentStreak), ui.Bold+ui.Green) + " " +
+		ui.Colorize("day streak", ui.Green) + "  " +
+		ui.Colorize(fmt.Sprintf("%d", stats.LongestStreak), ui.Bold+ui.Yellow) + " " +
+		ui.Colorize("longest", ui.Yellow)
 
-	leftLen := ui.VisibleLen(left)
-	rightLen := ui.VisibleLen(right)
-	padding := w - leftLen - rightLen
-	if padding < 1 {
-		padding = 1
-	}
-	fmt.Printf("%s%*s%s\n", left, padding, "", right)
+	ui.Justified(left, right, w)
 
-	center := fmt.Sprintf("%s%d%s %ssessions%s  %s%d%s %sproblems%s",
-		ui.Bold+ui.Blue, stats.TotalSessions, ui.Reset,
-		ui.Blue, ui.Reset,
-		ui.Bold+ui.Cyan, stats.UniqueProblems, ui.Reset,
-		ui.Cyan, ui.Reset)
+	center := ui.Colorize(fmt.Sprintf("%d", stats.TotalSessions), ui.Bold+ui.Blue) + " " +
+		ui.Colorize("sessions", ui.Blue) + "  " +
+		ui.Colorize(fmt.Sprintf("%d", stats.UniqueProblems), ui.Bold+ui.Cyan) + " " +
+		ui.Colorize("problems", ui.Cyan)
 
 	centerLen := ui.VisibleLen(center)
 	leftPad := (w - centerLen) / 2
@@ -65,20 +55,20 @@ func printRecent() {
 	now := time.Now()
 
 	if len(today) == 0 {
-		fmt.Printf("  %s%s%s %s— no practice yet%s\n",
-			ui.Dim, now.Format("Monday"), ui.Reset,
-			ui.Dim, ui.Reset)
+		fmt.Printf("  %s — %s\n",
+			ui.Colorize(now.Format("Monday"), ui.Dim),
+			ui.Colorize("no practice yet", ui.Dim))
 		return
 	}
 
-	fmt.Printf("  %s%s%s %s—%s %s%d%s %spracticed%s\n",
-		ui.Cyan, now.Format("Monday"), ui.Reset,
-		ui.Dim, ui.Reset,
-		ui.Bold+ui.Green, len(today), ui.Reset,
-		ui.Green, ui.Reset)
+	fmt.Printf("  %s %s %s %s\n",
+		ui.Colorize(now.Format("Monday"), ui.Cyan),
+		ui.Colorize("—", ui.Dim),
+		ui.Colorize(fmt.Sprintf("%d", len(today)), ui.Bold+ui.Green),
+		ui.Colorize("practiced", ui.Green))
 
 	for _, p := range today {
-		fmt.Printf("    %s%s %s%s%s\n", ui.Green, ui.Reset, ui.Dim, p, ui.Reset)
+		fmt.Printf("    %s %s\n", ui.Colorize("", ui.Green), ui.Colorize(p, ui.Dim))
 	}
 }
 
@@ -88,16 +78,14 @@ func printNext() {
 
 	if p != nil {
 		if dueCount > 0 {
-			ui.Info(fmt.Sprintf("kz solve %s%s%s %s(%d due)%s",
-				ui.Yellow, p.Name, ui.Reset+ui.Dim,
-				ui.Dim, dueCount, ui.Reset))
+			ui.Info(fmt.Sprintf("kz solve %s %s",
+				ui.Colorize(p.Name, ui.Yellow),
+				ui.Colorize(fmt.Sprintf("(%d due)", dueCount), ui.Dim)))
 		} else {
-			ui.Info(fmt.Sprintf("kz solve %s%s%s",
-				ui.Yellow, p.Name, ui.Reset))
+			ui.Info("kz solve " + ui.Colorize(p.Name, ui.Yellow))
 		}
 	} else {
-		ui.Info(fmt.Sprintf("kz new %s<problem-name>%s",
-			ui.Yellow, ui.Reset))
+		ui.Info("kz new " + ui.Colorize("<problem-name>", ui.Yellow))
 	}
 }
 

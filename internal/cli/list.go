@@ -36,18 +36,18 @@ func (c *ListCmd) Run() error {
 			if currentSection != "" {
 				fmt.Println()
 			}
-			fmt.Printf("%s%s/%s\n", ui.Bold, p.Section, ui.Reset)
+			ui.Println(ui.Bold, p.Section+"/")
 			currentSection = p.Section
 		}
 
 		kyuStr := ""
 		if p.Kyu != nil {
-			kyuStr = fmt.Sprintf(" %s[%d-%s]%s", ui.Dim, *p.Kyu, kyuNames[*p.Kyu-1], ui.Reset)
+			kyuStr = " " + ui.Colorize(fmt.Sprintf("[%d-%s]", *p.Kyu, kyuNames[*p.Kyu-1]), ui.Dim)
 		}
 
 		tagStr := ""
 		if tags := p.TagList(); len(tags) > 0 {
-			tagStr = fmt.Sprintf(" %s%s%s", ui.Cyan, strings.Join(tags, ", "), ui.Reset)
+			tagStr = " " + ui.Colorize(strings.Join(tags, ", "), ui.Cyan)
 		}
 
 		fmt.Printf("  %s%s%s\n", p.Name, kyuStr, tagStr)
@@ -71,7 +71,7 @@ func (c *SectionsCmd) Run() error {
 	}
 
 	for _, s := range sections {
-		fmt.Printf("  %s\n", s)
+		ui.ListItem(0, s)
 	}
 	return nil
 }
@@ -90,7 +90,7 @@ func (c *TagsCmd) Run() error {
 	}
 
 	for t, count := range tags {
-		fmt.Printf("  %s %s(%d)%s\n", t, ui.Dim, count, ui.Reset)
+		fmt.Printf("  %s %s\n", t, ui.Colorize(fmt.Sprintf("(%d)", count), ui.Dim))
 	}
 	return nil
 }

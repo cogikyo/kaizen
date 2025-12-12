@@ -30,28 +30,29 @@ func (c *RandomCmd) Run() error {
 		return nil
 	}
 
-	fmt.Printf("\n%s%s%s\n", ui.Bold, p.Path, ui.Reset)
+	fmt.Println()
+	ui.Println(ui.Bold, p.Path)
 
 	if p.Kyu != nil {
-		fmt.Printf("  %skyu:%s %d-%s\n", ui.Dim, ui.Reset, *p.Kyu, kyuNames[*p.Kyu-1])
+		ui.Field("kyu", fmt.Sprintf("%d-%s", *p.Kyu, kyuNames[*p.Kyu-1]))
 	}
 	if p.Tags != nil {
-		fmt.Printf("  %stags:%s %s\n", ui.Dim, ui.Reset, *p.Tags)
+		ui.Field("tags", *p.Tags)
 	}
 	if p.Source != nil {
-		fmt.Printf("  %ssource:%s %s\n", ui.Dim, ui.Reset, *p.Source)
+		ui.Field("source", *p.Source)
 	}
 	if p.URL != nil {
-		fmt.Printf("  %surl:%s %s\n", ui.Dim, ui.Reset, *p.URL)
+		ui.Field("url", *p.URL)
 	}
 
 	attempts, passes, totalTime, _ := db.GetProblemStats(p.Path)
 	if attempts > 0 {
-		fmt.Printf("  %spracticed:%s %d attempts, %d passed, %s total\n",
-			ui.Dim, ui.Reset, attempts, passes, formatDuration(totalTime))
+		ui.Field("practiced", fmt.Sprintf("%d attempts, %d passed, %s total", attempts, passes, formatDuration(totalTime)))
 	}
 
-	fmt.Printf("\n%skz solve %s%s\n\n", ui.Dim, p.Name, ui.Reset)
+	ui.Hint("kz solve " + p.Name)
+	fmt.Println()
 
 	return nil
 }

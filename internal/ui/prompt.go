@@ -2,7 +2,6 @@ package ui
 
 import (
 	"bufio"
-	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -11,30 +10,30 @@ import (
 var reader = bufio.NewReader(os.Stdin)
 
 func Prompt(label string) string {
-	fmt.Printf("%s%s %s%s:%s ", BrightCyan, Reset, Cyan, label, Reset)
+	Ask(label + ":")
 	line, _ := reader.ReadString('\n')
 	return strings.TrimSpace(line)
 }
 
 func PromptInline(label string) string {
-	fmt.Printf("  %s%s:%s ", Dim, label, Reset)
+	InlineLabel(label)
 	line, _ := reader.ReadString('\n')
 	return strings.TrimSpace(line)
 }
 
 func PromptConfirm(label string) bool {
-	fmt.Printf("%s%s %s%s%s %s[y/N]:%s ", BrightCyan, Reset, Cyan, label, Reset, Dim, Reset)
+	Ask(label + " [y/N]:")
 	line, _ := reader.ReadString('\n')
 	return strings.ToLower(strings.TrimSpace(line)) == "y"
 }
 
 func PromptSelect(label string, options []string, allowNew bool) (int, string) {
-	fmt.Printf("\n%s%s %s%s%s\n", BrightCyan, Reset, Cyan, label, Reset)
+	Label(label)
 	for i, opt := range options {
-		fmt.Printf("  %s%d%s %s\n", Dim, i+1, Reset, opt)
+		ListItem(i+1, opt)
 	}
 	if allowNew {
-		fmt.Printf("  %s+%s new\n", Green, Reset)
+		ActionItem("+", "new")
 	}
 
 	input := PromptInline("select")
@@ -50,12 +49,12 @@ func PromptSelect(label string, options []string, allowNew bool) (int, string) {
 }
 
 func PromptMultiSelect(label string, options []string, hint string) []string {
-	fmt.Printf("\n%s%s %s%s%s %s(%s)%s\n", BrightCyan, Reset, Cyan, label, Reset, Dim, hint, Reset)
+	LabelHint(label, hint)
 	for i, opt := range options {
-		fmt.Printf("  %s%d%s %s\n", Dim, i+1, Reset, opt)
+		ListItem(i+1, opt)
 	}
 	if len(options) > 0 {
-		fmt.Printf("  %s+%s add new\n", Green, Reset)
+		ActionItem("+", "add new")
 	}
 
 	input := PromptInline("select")

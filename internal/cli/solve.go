@@ -33,8 +33,9 @@ func (c *SolveCmd) Run() error {
 		editor = "vim"
 	}
 
-	fmt.Printf("%sopening %s in %s%s\n", ui.Dim, p.Path, editor, ui.Reset)
-	fmt.Printf("%srun 'kz done %s' when finished%s\n\n", ui.Dim, p.Name, ui.Reset)
+	ui.Hint(fmt.Sprintf("opening %s in %s", p.Path, editor))
+	ui.Hint(fmt.Sprintf("run 'kz done %s' when finished", p.Name))
+	fmt.Println()
 
 	cmd := exec.Command(editor, p.Path)
 	cmd.Stdin = os.Stdin

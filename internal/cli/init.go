@@ -37,7 +37,7 @@ func initRepo() error {
 
 func initSection(name string) error {
 	if !db.Exists() {
-		fmt.Println("not a kaizen directory (run 'kz init' first)")
+		ui.Warn("not a kaizen directory (run 'kz init' first)")
 		return nil
 	}
 

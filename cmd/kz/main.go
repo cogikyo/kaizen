@@ -10,7 +10,6 @@ import (
 
 	"cogikyo/kaizen/internal/cli"
 	"cogikyo/kaizen/internal/db"
-	"cogikyo/kaizen/internal/ui"
 )
 
 func main() {
@@ -23,13 +22,6 @@ func main() {
 
 	cmd := ctx.Command()
 	isInit := strings.HasPrefix(cmd, "init")
-
-	ui.Info("info message")
-	ui.Error("error message")
-	ui.Warn("warn message")
-	ui.Ask("ask message")
-	ui.Heading("heading message")
-	ui.Success("success message")
 
 	if !isInit {
 		if err := cli.OpenDB(); err != nil {

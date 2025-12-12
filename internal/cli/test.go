@@ -29,7 +29,8 @@ func (c *TestCmd) Run() error {
 		}
 	}
 
-	fmt.Printf("%srunning%s %s\n\n", ui.Dim, ui.Reset, path)
+	ui.Println(ui.Dim, "running "+path)
+	fmt.Println()
 
 	cmd := exec.Command("go", "test", "-v", path)
 	cmd.Stdout = os.Stdout

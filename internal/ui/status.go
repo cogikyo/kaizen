@@ -84,11 +84,11 @@ func BuildStatus(startMonth time.Time) *StatusData {
 func RenderTable(s *StatusData) {
 	weeks := s.Weeks
 
-	fmt.Printf("    %s┌", Grey)
+	fmt.Printf("    %s┌", BrightBlack)
 	fmt.Print(strings.Repeat(strings.Repeat("─", cellWidth)+"┬", weeks-1))
-	fmt.Println(strings.Repeat("─", cellWidth) + "┐" + Reset)
+	fmt.Println(strings.Repeat("─", cellWidth) + "┐" + BrightBlack)
 
-	monthLine := "    " + Grey + "│" + Reset
+	monthLine := "    " + BrightBlack + "│" + Reset
 	for w := range weeks {
 		if s.Months[w] != "" {
 			pad := cellWidth - len(s.Months[w])
@@ -98,29 +98,29 @@ func RenderTable(s *StatusData) {
 		} else {
 			monthLine += strings.Repeat(" ", cellWidth)
 		}
-		monthLine += Grey + "│" + Reset
+		monthLine += BrightBlack + "│" + Reset
 	}
 	fmt.Println(monthLine)
 
-	fmt.Printf("    %s├", Grey)
+	fmt.Printf("    %s├", BrightBlack)
 	fmt.Print(strings.Repeat(strings.Repeat("─", cellWidth)+"┼", weeks-1))
 	fmt.Println(strings.Repeat("─", cellWidth) + "┤" + Reset)
 
 	dayLabels := []string{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}
 	for row := range 7 {
-		fmt.Printf("%s%s%s %s│%s", Dim, dayLabels[row], Reset, Grey, Reset)
+		fmt.Printf("%s%s%s %s│%s", Dim, dayLabels[row], Reset, BrightBlack, Reset)
 		for w := range weeks {
 			idx := w*7 + row
 			if idx >= len(s.Days) {
-				fmt.Printf("%s%s│%s", strings.Repeat(" ", cellWidth), Grey, Reset)
+				fmt.Printf("%s%s│%s", strings.Repeat(" ", cellWidth), BrightBlack, Reset)
 				continue
 			}
-			fmt.Printf("%s%s│%s", cellBlock(s.Days[idx], s.MaxCount), Grey, Reset)
+			fmt.Printf("%s%s│%s", cellBlock(s.Days[idx], s.MaxCount), BrightBlack, Reset)
 		}
 		fmt.Println()
 	}
 
-	fmt.Printf("    %s└", Grey)
+	fmt.Printf("    %s└", BrightBlack)
 	fmt.Print(strings.Repeat(strings.Repeat("─", cellWidth)+"┴", weeks-1))
 	fmt.Println(strings.Repeat("─", cellWidth) + "┘" + Reset)
 }
@@ -141,7 +141,7 @@ func cellBlock(count, maxCount int) string {
 		return strings.Repeat(" ", cellWidth)
 	}
 	if count == -2 {
-		return Grey + " ·· " + Reset
+		return BrightBlack + " ·· " + Reset
 	}
 	if count == 0 {
 		return Black + " ░░ " + Reset
